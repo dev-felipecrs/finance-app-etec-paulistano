@@ -25,7 +25,13 @@ import {
 } from './components/ui/dropdown-menu'
 
 export default function App() {
-  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const storagedTransactions = localStorage.getItem('@finance.app:transactions')
+
+    if (!storagedTransactions) return []
+
+    return JSON.parse(storagedTransactions)
+  })
 
   const incomeValue = transactions.reduce((acc, transaction) => {
     return transaction.type === 'income' ? acc + transaction.value : acc
@@ -38,7 +44,13 @@ export default function App() {
   const balance = incomeValue - outcomeValue
 
   const handleTransactionCreation = (transaction: Transaction) => {
-    setTransactions(transactions => [transaction, ...transactions])
+    const transactionsToSave = [transaction, ...transactions]
+
+    localStorage.setItem(
+      '@finance.app:transactions', 
+      JSON.stringify(transactionsToSave)
+    )
+    setTransactions(transactionsToSave)
   }
 
   return (
